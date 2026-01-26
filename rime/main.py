@@ -1,10 +1,12 @@
 import click
 import os
+import random
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.live import Live
 from rime.client import AIClient
+from rime.banners import BANNERS
 
 # Load environment variables from .env file
 # 加载 .env 文件中的环境变量，方便本地开发和配置
@@ -21,20 +23,9 @@ def cli():
 @cli.command()
 def chat():
     """Start a chat session with Rime."""
-    # Welcome Banner
-    console.print(r"""[bold cyan]
-      ___                        ___           ___     
-     /  /\           ___        /  /\         /  /\    
-    /  /::\         /__/\      /  /::|       /  /::\   
-   /  /:/\:\        \__\:\    /  /:|:|      /  /:/\:\  
-  /  /::\ \:\       /  /::\  /  /:/|:|__   /  /::\ \:\ 
- /__/:/\:\_\:\   __/  /:/\/ /__/:/_|::::\ /__/:/\:\ \:\
- \__\/~|::\/:/  /__/\/:/~~  \__\/  /~~/:/ \  \:\ \:\_\/
-    |  |:|::/   \  \::/           /  /:/   \  \:\ \:\  
-    |  |:|\/     \  \:\          /  /:/     \  \:\_\/  
-    |__|:|~       \__\/         /__/:/       \  \:\    
-     \__\|                      \__\/         \__\/    
-[/bold cyan]""")
+    # Welcome Banner - Random Selection
+    # 从 banners 列表中随机选择一个并打印
+    console.print(random.choice(BANNERS))
     console.print("[dim]Your Personal Local AI Chatbot[/dim]\n")
 
     # 从环境变量获取配置信息
