@@ -40,12 +40,13 @@ class AIClient:
 
         try:
             # 发起 POST 请求，开启 stream=True 以便逐行读取响应
-            # 设置 timeout=10，如果 10 秒内没有连接上或没有数据返回，将抛出 Timeout 异常
-            response = requests.post(url, headers=self.headers, json=payload, stream=True, timeout=7)
+            # 设置 timeout=30，给大模型更多思考时间
+            response = requests.post(url, headers=self.headers, json=payload, stream=True, timeout=30)
             response.raise_for_status() # 如果状态码不是 200，抛出异常
 
             # 逐行读取响应内容（Server-Sent Events 格式）
-            for line in response.iter_lines():
+            # chunk_size=None 表示让服务器决定块大小，通常能避免客户端缓冲
+            for line in response.iter_lines(chunk_size=None):
                 if line:
                     decoded_line = line.decode('utf-8')
                     # SSE 格式的数据行通常以 "data: " 开头
