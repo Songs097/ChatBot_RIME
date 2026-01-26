@@ -21,6 +21,22 @@ def cli():
 @cli.command()
 def chat():
     """Start a chat session with Rime."""
+    # Welcome Banner
+    console.print(r"""[bold cyan]
+      ___                        ___           ___     
+     /  /\           ___        /  /\         /  /\    
+    /  /::\         /__/\      /  /::|       /  /::\   
+   /  /:/\:\        \__\:\    /  /:|:|      /  /:/\:\  
+  /  /::\ \:\       /  /::\  /  /:/|:|__   /  /::\ \:\ 
+ /__/:/\:\_\:\   __/  /:/\/ /__/:/_|::::\ /__/:/\:\ \:\
+ \__\/~|::\/:/  /__/\/:/~~  \__\/  /~~/:/ \  \:\ \:\_\/
+    |  |:|::/   \  \::/           /  /:/   \  \:\ \:\  
+    |  |:|\/     \  \:\          /  /:/     \  \:\_\/  
+    |__|:|~       \__\/         /__/:/       \  \:\    
+     \__\|                      \__\/         \__\/    
+[/bold cyan]""")
+    console.print("[dim]Your Personal Local AI Chatbot[/dim]\n")
+
     # 从环境变量获取配置信息
     api_key = os.getenv("API_KEY")
     base_url = os.getenv("API_BASE_URL")
