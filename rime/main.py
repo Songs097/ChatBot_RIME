@@ -74,21 +74,28 @@ def chat():
 
             # Stream response
             response_content = ""
-            # 使用 Rich 的 Live 组件显示实时更新的 Markdown
-            with Live(Markdown(""), refresh_per_second=10) as live:
-                console.print("[bold green]Rime > [/bold green]", end="")
-                # 从客户端获取流式响应
-                for chunk in client.chat_completion(messages):
-                    response_content += chunk
-                    # 实时更新显示内容
-                    live.update(Markdown(response_content))
+            try:
+                # 使用 Rich 的 Live 组件显示实时更新的 Markdown
+                with Live(Markdown(""), refresh_per_second=10) as live:
+                    console.print("[bold green]Rime > [/bold green]", end="")
+                    # 从客户端获取流式响应
+                    for chunk in client.chat_completion(messages):
+                        response_content += chunk
+                        # 实时更新显示内容
+                        live.update(Markdown(response_content))
+            except KeyboardInterrupt:
+                # 用户手动打断生成
+                console.print("\n[bold yellow]Generating interrupted by user.[/bold yellow]")
+                # 依然保存已生成的部分，防止上下文丢失
+                messages.append({"role": "assistant", "content": response_content})
+                continue
             
             console.print() # Newline after response
             # 将 AI 的完整回复加入历史记录，保持上下文
             messages.append({"role": "assistant", "content": response_content})
 
         except KeyboardInterrupt:
-            # 处理 Ctrl+C 中断
+            # 处理主循环的 Ctrl+C 中断 (退出程序)
             console.print("\n[yellow]Goodbye![/yellow]")
             break
         except Exception as e:
