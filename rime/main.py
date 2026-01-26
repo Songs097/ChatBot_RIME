@@ -7,6 +7,7 @@ from rich.markdown import Markdown
 from rich.live import Live
 from rime.client import AIClient
 from rime.banners import BANNERS
+from rime.utils import stream_with_spinner
 
 # Load environment variables from .env file
 # 加载 .env 文件中的环境变量，方便本地开发和配置
@@ -75,11 +76,18 @@ def chat():
             # Stream response
             response_content = ""
             try:
+                # 使用辅助函数处理 Spinner 逻辑，获取首个 chunk 和剩余生成器
+                generator = client.chat_completion(messages)
+                first_chunk, generator = stream_with_spinner(generator, console)
+
+                # 2. 拿到第一个字后，停止 Spinner，进入打字机模式
                 # 使用 Rich 的 Live 组件显示实时更新的 Markdown
-                with Live(Markdown(""), refresh_per_second=10) as live:
+                with Live(Markdown(first_chunk), refresh_per_second=10) as live:
                     console.print("[bold green]Rime > [/bold green]", end="")
-                    # 从客户端获取流式响应
-                    for chunk in client.chat_completion(messages):
+                    response_content += first_chunk
+                    
+                    # 继续获取剩余的 chunk
+                    for chunk in generator:
                         response_content += chunk
                         # 实时更新显示内容
                         live.update(Markdown(response_content))
