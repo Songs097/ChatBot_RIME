@@ -1,13 +1,13 @@
 import os
-from typing import Generator, Tuple, Any, Optional
+from typing import Generator, Tuple, Any, Optional, Dict
 from rich.console import Console
 
-def load_config(console: Console) -> Optional[Tuple[str, str, str]]:
+def load_config(console: Console) -> Optional[Dict[str, Any]]:
     """
     Loads API configuration from environment variables and validates them.
     
     :param console: The Rich console instance for printing errors.
-    :return: A tuple of (api_key, base_url, model) if valid, otherwise None.
+    :return: A dictionary containing config items if valid, otherwise None.
     """
     api_key = os.getenv("API_KEY")
     base_url = os.getenv("API_BASE_URL")
@@ -23,4 +23,9 @@ def load_config(console: Console) -> Optional[Tuple[str, str, str]]:
         console.print("Please create a .env file with your API credentials.")
         return None
 
-    return api_key, base_url, model
+    return {
+        "api_key": api_key,
+        "base_url": base_url,
+        "model": model,
+        "stream": True # 默认启用流式输出
+    }

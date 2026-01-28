@@ -31,16 +31,15 @@ def chat():
     console.print("[dim]Your Personal Local AI Chatbot[/dim]\n")
 
     # 加载并验证配置
-    config_data = load_config(console)
-    if not config_data:
+    client_config = load_config(console)
+    if not client_config:
         return
-    api_key, base_url, model = config_data
 
-    console.print(f"[bold green]Rime (Model: {model})[/bold green] is ready! Type 'exit' or 'quit' to end.")
+    console.print(f"[bold green]Rime (Model: {client_config['model']})[/bold green] is ready! Type 'exit' or 'quit' to end.")
     console.print("-" * 50)
 
     # 初始化 API 客户端
-    client = AIClient(api_key, base_url, model)
+    client = AIClient(client_config)
 
     # 保存对话历史
     messages = []

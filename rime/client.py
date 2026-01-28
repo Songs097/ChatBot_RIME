@@ -1,25 +1,25 @@
 import requests
 import os
 import json
-from typing import List, Dict, Generator
+from typing import List, Dict, Generator, Any
 
 class AIClient:
     """
-    一个通用的 AI API 客户端，用于与支持 OpenAI 格式的 API 进行交互。
+    一个通用的 AI API客户端，用于与支持 OpenAI 格式的 API 进行交互。
     """
-    def __init__(self, api_key: str, base_url: str, model: str):
+    def __init__(self, config: Dict[str, Any]):
         """
         初始化客户端。
-        :param api_key: API 密钥
-        :param base_url: API 基础地址
-        :param model: 使用的模型名称
+        :param config: 配置字典，包含 api_key, base_url, model, stream (可选)
         """
-        self.api_key = api_key
+        self.api_key = config.get("api_key")
         # 确保 base_url 不以 / 结尾，避免拼接 URL 时出现双斜杠
-        self.base_url = base_url.rstrip('/')
-        self.model = model
+        self.base_url = config.get("base_url", "").rstrip('/')
+        self.model = config.get("model")
+        self.stream = config.get("stream", True) # 默认为 True
+        
         self.headers = {
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
 
@@ -35,7 +35,7 @@ class AIClient:
         payload = {
             "model": self.model,
             "messages": messages,
-            "stream": True  # 启用流式输出，实现打字机效果
+            "stream": self.stream  # 使用配置中的 stream 参数
         }
 
         try:
