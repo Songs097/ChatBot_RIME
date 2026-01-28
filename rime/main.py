@@ -7,7 +7,7 @@ from rich.markdown import Markdown
 from rich.live import Live
 from rime.client import AIClient
 from rime.banners import BANNERS
-from rime.utils import stream_with_spinner
+from rime.utils import stream_with_spinner, load_config
 
 # Load environment variables from .env file
 # 加载 .env 文件中的环境变量，方便本地开发和配置
@@ -29,21 +29,11 @@ def chat():
     console.print(random.choice(BANNERS))
     console.print("[dim]Your Personal Local AI Chatbot[/dim]\n")
 
-    # 从环境变量获取配置信息
-    api_key = os.getenv("API_KEY")
-    base_url = os.getenv("API_BASE_URL")
-    model = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
-
-    # 检查必要的配置是否存在
-    if not api_key:
-        console.print("[bold red]Error:[/bold red] API_KEY not found in environment variables.")
-        console.print("Please create a .env file with your API credentials.")
+    # 加载并验证配置
+    config_data = load_config(console)
+    if not config_data:
         return
-
-    if not base_url:
-        console.print("[bold red]Error:[/bold red] API_BASE_URL not found in environment variables.")
-        console.print("Please create a .env file with your API credentials.")
-        return
+    api_key, base_url, model = config_data
 
     # 初始化 API 客户端
     client = AIClient(api_key, base_url, model)
@@ -113,7 +103,7 @@ def chat():
 @cli.command()
 @click.option('--key', prompt='API Key', help='Your API Key')
 @click.option('--url', prompt='API Base URL', help='API Base URL')
-@click.option('--model', prompt='Model Name', default='gpt-3.5-turbo', help='Model Name')
+@click.option('--model', prompt='Model Name', help='Model Name')
 def config(key, url, model):
     """Configure API credentials."""
     # 将用户输入的配置写入 .env 文件

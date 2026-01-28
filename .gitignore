@@ -19,4 +19,5 @@ env/
 # IDE settings
 .vscode/
 .idea/
+.trae/
 *.swp
