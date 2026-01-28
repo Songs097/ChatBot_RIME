@@ -2,7 +2,8 @@ import click
 import os
 import random
 from dotenv import load_dotenv
-from rich.console import Console
+from rich.console import Console, Group
+from rich.text import Text
 from rich.markdown import Markdown
 from rich.live import Live
 from rime.client import AIClient
@@ -63,21 +64,41 @@ def chat():
             # 将用户消息加入历史记录
             messages.append({"role": "user", "content": user_input})
 
-            # Stream response
+            # 获取并渲染 AI 响应
             response_content = ""
             try:
-                # 直接获取响应生成器
+                # 获取响应生成器
                 generator = client.chat_completion(messages)
                 
-                # 使用 Rich 的 Live 组件显示实时更新的 Markdown
-                with Live(Markdown(""), refresh_per_second=10) as live:
-                    console.print("[bold green]Rime > [/bold green]", end="")
+                # 1. 在收到第一个块之前显示“思考中...”
+                first_chunk = ""
+                with console.status("[bold green]Thinking...", spinner="simpleDots"):
+                    try:
+                        # 获取第一个块，这一步会阻塞直到服务器返回数据
+                        first_chunk = next(generator)
+                    except StopIteration:
+                        # 如果生成器立即结束（空响应）
+                        pass
+
+                if first_chunk:
+                    # 2. 收到第一个块后，进入打字机渲染模式
+                    response_content = first_chunk
                     
-                    # 逐块处理响应
-                    for chunk in generator:
-                        response_content += chunk
-                        # 实时更新显示内容
-                        live.update(Markdown(response_content))
+                    # 定义初始渲染组
+                    render_group = Group(
+                        Text("Rime > ", style="bold green", end=""),
+                        Markdown(response_content)
+                    )
+
+                    with Live(render_group, refresh_per_second=10) as live:
+                        # 逐块处理剩余响应
+                        for chunk in generator:
+                            response_content += chunk
+                            # 实时更新显示内容
+                            live.update(Group(
+                                Text("Rime > ", style="bold green", end=""),
+                                Markdown(response_content)
+                            ))
             except KeyboardInterrupt:
                 # 用户手动打断生成
                 console.print("\n[bold yellow]Generating interrupted by user.[/bold yellow]")
