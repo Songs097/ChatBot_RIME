@@ -35,7 +35,10 @@ class AIClient:
         payload = {
             "model": self.model,
             "messages": messages,
-            "stream": self.stream  # 使用配置中的 stream 参数
+            "stream": self.stream,  # 使用配置中的 stream 参数
+            "thinking": {
+                "type": "disabled"
+            }
         }
 
         try:
