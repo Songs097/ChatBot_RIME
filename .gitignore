@@ -22,8 +22,9 @@ env/
 .trae/
 *.swp
 
-# Ignore .github folder and all its contents
+# Ignore skills folder and all its contents
 .github/
+.claude/
 
 # Ignore .specify folder and all its contents
 .specify/

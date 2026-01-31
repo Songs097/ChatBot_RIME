@@ -1,6 +1,9 @@
 import click
 import os
 import random
+import threading
+import webbrowser
+import time
 from dotenv import load_dotenv
 from rich.console import Console, Group
 from rich.text import Text
@@ -128,6 +131,29 @@ def config(key, url, model):
     with open('.env', 'w') as f:
         f.write(env_content)
     console.print("[green]Configuration saved to .env file![/green]")
+
+@cli.command()
+@click.option('--port', default=5000, help='Port for the web server')
+def web(port):
+    """Start the Rime web interface."""
+    from rime.server import start_server
+    
+    url = f"http://127.0.0.1:{port}"
+    console.print(f"[bold green]Starting Rime Web...[/bold green]")
+    console.print(f"Opening {url} in your browser...")
+
+    def open_browser():
+        time.sleep(1.5)  # Wait for server to start
+        webbrowser.open(url)
+
+    # Start browser in a separate thread
+    threading.Thread(target=open_browser, daemon=True).start()
+
+    # Start Flask server
+    try:
+        start_server(port=port)
+    except Exception as e:
+        console.print(f"[bold red]Failed to start server:[/bold red] {e}")
 
 if __name__ == '__main__':
     cli()
