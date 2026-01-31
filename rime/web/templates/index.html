@@ -6,101 +6,134 @@
     <title>Rime AI Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+            background: radial-gradient(circle at top right, #e0e7ff 0%, #f3f4f6 50%, #e0e7ff 100%);
             height: 100vh;
             overflow: hidden;
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.1);
         }
 
         .message-user {
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: #6366f1;
+            color: white;
             align-self: flex-end;
+            border-bottom-right-radius: 4px;
         }
 
         .message-ai {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: white;
+            color: #1f2937;
             align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .content p { margin-bottom: 0.5rem; }
+        .content p:last-child { margin-bottom: 0; }
+        .content code { 
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+        .message-user .content code {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 md:p-8">
-    <div class="glass w-full max-w-4xl h-full rounded-3xl flex flex-col overflow-hidden relative">
+<body class="flex items-center justify-center p-4 md:p-8 bg-slate-50">
+    <div class="glass w-full max-w-5xl h-[90vh] rounded-[2.5rem] flex flex-col overflow-hidden relative border border-white/60">
         <!-- Header -->
-        <header class="p-6 border-b border-white/30 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                    <i data-lucide="bot"></i>
+        <header class="px-8 py-6 flex items-center justify-between bg-white/30 backdrop-blur-md border-b border-white/40">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-200/50">
+                    <i data-lucide="sparkles" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-gray-800 text-lg">Rime AI</h1>
-                    <p class="text-xs text-indigo-600 font-medium flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                        Online
-                    </p>
+                    <h1 class="font-bold text-gray-900 text-xl tracking-tight">Rime AI</h1>
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-2 w-2 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">System Ready</p>
+                    </div>
                 </div>
             </div>
-            <button class="p-2 text-gray-500 hover:text-indigo-600 transition-colors">
-                <i data-lucide="settings"></i>
-            </button>
+            <div class="flex items-center gap-2">
+                <button 
+                    onclick="window.location.reload()" 
+                    class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white/50 rounded-xl transition-all duration-200"
+                    aria-label="New Chat"
+                    title="New Chat"
+                >
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                </button>
+                <button class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white/50 rounded-xl transition-all duration-200" aria-label="Settings">
+                    <i data-lucide="settings-2" class="w-5 h-5"></i>
+                </button>
+            </div>
         </header>
 
         <!-- Chat Container -->
-        <div id="chat-container" class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar">
+        <div id="chat-container" class="flex-1 overflow-y-auto px-8 py-8 flex flex-col gap-8 custom-scrollbar scroll-smooth">
             <!-- Welcome Message -->
-            <div class="message-ai p-4 rounded-2xl max-w-[85%] shadow-sm">
-                <p class="text-sm text-gray-700 leading-relaxed">
+            <div class="message-ai p-5 rounded-[2rem] rounded-bl-lg max-w-[80%] shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="content text-[15px] leading-relaxed">
                     Hello! I'm Rime, your personal AI assistant. How can I help you today?
-                </p>
+                </div>
             </div>
         </div>
 
         <!-- Input Area -->
-        <div class="p-6 bg-white/20 border-t border-white/30">
-            <div class="relative flex items-end gap-3 max-w-3xl mx-auto">
-                <div class="flex-1 relative">
+        <div class="p-8 bg-white/40 backdrop-blur-lg border-t border-white/40">
+            <div class="relative flex items-end gap-4 max-w-4xl mx-auto">
+                <div class="flex-1 relative group">
                     <textarea 
                         id="user-input"
                         rows="1"
-                        placeholder="Type a message..." 
-                        class="w-full bg-white/50 border border-white/50 rounded-2xl py-3 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all text-sm resize-none custom-scrollbar"
+                        placeholder="Message Rime..." 
+                        class="w-full bg-white/80 border border-gray-200 rounded-2xl py-4 pl-5 pr-14 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all text-[15px] resize-none custom-scrollbar shadow-sm group-hover:shadow-md"
                         oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
                     ></textarea>
+                    <div class="absolute right-3 bottom-3 flex items-center gap-2">
+                        <button 
+                            id="send-btn"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-30 disabled:shadow-none active:scale-95"
+                            onclick="sendMessage()"
+                            aria-label="Send message"
+                        >
+                            <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
-                <button 
-                    id="send-btn"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:shadow-none"
-                    onclick="sendMessage()"
-                >
-                    <i data-lucide="send" class="w-5 h-5"></i>
-                </button>
             </div>
-            <p class="text-[10px] text-center text-gray-400 mt-4">
-                Rime can make mistakes. Check important info.
+            <p class="text-[11px] text-center text-gray-400 mt-4 font-medium">
+                Rime also can make mistakes
             </p>
         </div>
     </div>
@@ -114,6 +147,12 @@
         const sendBtn = document.getElementById('send-btn');
 
         let messages = [];
+
+        // Configure marked options
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
 
         userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -134,7 +173,7 @@
             addMessage(text, 'user');
             
             // Prepare for AI response
-            const aiMessageDiv = addMessage('', 'ai');
+            const aiMessageDiv = addMessage('...', 'ai');
             const contentDiv = aiMessageDiv.querySelector('.content');
             
             messages.push({ role: 'user', content: text });
@@ -160,15 +199,14 @@
                     
                     const chunk = decoder.decode(value);
                     fullAiResponse += chunk;
-                    contentDiv.innerText = fullAiResponse;
+                    contentDiv.innerHTML = marked.parse(fullAiResponse);
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
 
                 messages.push({ role: 'assistant', content: fullAiResponse });
 
             } catch (error) {
-                contentDiv.innerText = 'Error: ' + error.message;
-                contentDiv.classList.add('text-red-500');
+                contentDiv.innerHTML = `<span class="text-red-500 font-medium italic">Error: ${error.message}</span>`;
             } finally {
                 sendBtn.disabled = false;
             }
@@ -176,11 +214,15 @@
 
         function addMessage(text, role) {
             const div = document.createElement('div');
-            div.className = `p-4 rounded-2xl max-w-[85%] shadow-sm ${role === 'user' ? 'message-user' : 'message-ai'}`;
+            const isUser = role === 'user';
+            
+            div.className = `p-5 rounded-[2rem] max-w-[80%] shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300 ${
+                isUser ? 'message-user rounded-br-lg' : 'message-ai rounded-bl-lg'
+            }`;
             
             const inner = document.createElement('div');
-            inner.className = 'content text-gray-700 text-sm leading-relaxed whitespace-pre-wrap';
-            inner.innerText = text;
+            inner.className = 'content text-[15px] leading-relaxed';
+            inner.innerHTML = isUser ? text : marked.parse(text);
             
             div.appendChild(inner);
             chatContainer.appendChild(div);

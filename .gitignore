@@ -23,6 +23,7 @@ env/
 *.swp
 
 # Ignore skills folder and all its contents
+skills/
 .github/
 .claude/
 
