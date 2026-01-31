@@ -21,3 +21,9 @@ env/
 .idea/
 .trae/
 *.swp
+
+# Ignore .github folder and all its contents
+.github/
+
+# Ignore .specify folder and all its contents
+.specify/
