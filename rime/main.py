@@ -31,7 +31,6 @@ def chat():
     # Welcome Banner - Random Selection
     # 从 banners 列表中随机选择一个并打印
     console.print(random.choice(BANNERS))
-    console.print("[dim]Your Personal Local AI Chatbot[/dim]\n")
 
     # 加载并验证配置
     client_config = load_config(console)
@@ -137,6 +136,9 @@ def config(key, url, model):
 def web(port):
     """Start the Rime web interface."""
     from rime.server import start_server
+    
+    # Welcome Banner - Random Selection
+    console.print(random.choice(BANNERS))
     
     url = f"http://127.0.0.1:{port}"
     console.print(f"[bold green]Starting Rime Web...[/bold green]")
